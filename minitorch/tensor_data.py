@@ -94,7 +94,7 @@ def broadcast_index(
         out_index : multidimensional index of smaller tensor
 
     Returns:
-        None: This function does not return any value explicitly.
+        None
     """
     # TODO: Implement for Task 2.2.
     # raise NotImplementedError("Need to implement for Task 2.2")
