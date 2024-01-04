@@ -2,6 +2,7 @@
 Be sure you have minitorch installed in you Virtual Env.
 >>> pip install -Ue .
 """
+import time
 
 import minitorch
 
@@ -22,7 +23,14 @@ class Network(minitorch.Module):
 
     def forward(self, x):
         # TODO: Implement for Task 2.5.
-        raise NotImplementedError("Need to implement for Task 2.5")
+        # raise NotImplementedError("Need to implement for Task 2.5")
+        h = self.layer1.forward(x)
+        h = h.relu()
+        h = self.layer2.forward(h)
+        h = h.relu()
+        h = self.layer3.forward(h)
+        h = h.sigmoid()
+        return h
 
 
 class Linear(minitorch.Module):
@@ -34,7 +42,15 @@ class Linear(minitorch.Module):
 
     def forward(self, x):
         # TODO: Implement for Task 2.5.
-        raise NotImplementedError("Need to implement for Task 2.5")
+        # raise NotImplementedError("Need to implement for Task 2.5")
+        x_reshaped = x.view(*x.shape, 1)
+        weights_reshaped = self.weights.value.view(1, *self.weights.value.shape)
+        weighted_x = x_reshaped * weights_reshaped
+        summed_x = weighted_x.sum(1)
+        output = summed_x.view(x.shape[0], self.out_size) + self.bias.value.view(
+            1, *self.bias.value.shape
+        )
+        return output
 
 
 def default_log_fn(epoch, total_loss, correct, losses):
@@ -63,6 +79,7 @@ class TensorTrain:
         y = minitorch.tensor(data.y)
 
         losses = []
+        begin = time.time()
         for epoch in range(1, self.max_epochs + 1):
             total_loss = 0.0
             correct = 0
@@ -85,11 +102,14 @@ class TensorTrain:
                 y2 = minitorch.tensor(data.y)
                 correct = int(((out.detach() > 0.5) == y2).sum()[0])
                 log_fn(epoch, total_loss, correct, losses)
+        end = time.time()
+        time_per_epoch = (end - begin) / self.max_epochs
+        print("Time Per Epoch: ", time_per_epoch, "s")
 
 
 if __name__ == "__main__":
-    PTS = 50
-    HIDDEN = 2
+    PTS = 150
+    HIDDEN = 51
     RATE = 0.5
-    data = minitorch.datasets["Simple"](PTS)
+    data = minitorch.datasets["Spiral"](PTS)
     TensorTrain(HIDDEN).train(data, RATE)
